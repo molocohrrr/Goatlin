@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '11'
 
       - name: Give Gradlew Execute Permission
         run: chmod +x packages/clients/android/gradlew
@@ -32,7 +32,7 @@ jobs:
         run: |
           cd packages/clients/android
           ./gradlew detekt --init-config
-          ./gradlew detekt > ../../detekt-result.txt
+          ./gradlew detekt --stacktrace > ../../detekt-result.txt
           if grep -q 'complexity' ../../detekt-result.txt; then
             echo "Violations found!"
             echo "::set-output name=violations::true"
