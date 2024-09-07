@@ -3,13 +3,7 @@ name: Detekt Scan
 on:
   push:
     branches:
-      - main
-      - develop
-  pull_request:
-    branches:
-      - main
-      - develop
-
+      - '**'
 jobs:
   detekt:
     runs-on: ubuntu-latest
