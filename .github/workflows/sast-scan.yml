@@ -1,0 +1,55 @@
+name: Detekt Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  detekt-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17' # Altere conforme sua versão do Java
+
+      - name: Install Detekt
+        run: |
+          ./gradlew detekt --init-config # Cria um arquivo de configuração detekt.yml se não existir
+
+      - name: Run Detekt
+        id: detekt
+        run: |
+          ./gradlew detekt > detekt-result.txt
+          if grep -q 'complexity' detekt-result.txt; then
+            echo "Violations found!"
+            echo "::set-output name=violations::true"
+          else
+            echo "No violations found."
+            echo "::set-output name=violations::false"
+          fi
+
+      - name: Upload Detekt Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: detekt-result
+          path: detekt-result.txt
+
+      - name: Create GitHub Issue
+        if: steps.detekt.outputs.violations == 'true'
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Detekt Violations Detected"
+          content-filepath: detekt-result.txt
+          labels: "code quality, detekt"
