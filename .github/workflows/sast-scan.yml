@@ -11,25 +11,12 @@ on:
       - develop
 
 jobs:
-  detekt-scan:
+  detekt:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: "checkout"
+        uses: actions/checkout@v2
 
-      - name: Run Detekt
-        uses: detekt/detekt-action@v1.23.0
-        with:
-          # Caminho para o diretório do projeto
-          project-root: packages/clients/android
-          config-file: packages/clients/android/config/detekt/detekt.yml # Opcional: se houver arquivo de configuração personalizado
-          baseline-file: packages/clients/android/config/detekt/baseline.xml # Opcional: baseline para suprimir problemas conhecidos
-          fail-on-error: true # Definir como false se você quiser continuar a build mesmo com erros de código detectados
-
-      - name: Upload Detekt Report
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: detekt-report
-          path: detekt-report.html # Ou outro tipo de arquivo de relatório gerado
+      - name: "detekt"
+        uses: natiginfo/action-detekt-all@1.23.6
