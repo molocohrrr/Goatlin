@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
@@ -18,32 +17,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
-      - name: Give Gradlew Execute Permission
-        run: chmod +x packages/clients/android/gradlew
-
       - name: Run Detekt
-        id: detekt
-        run: |
-          cd packages/clients/android
-          ./gradlew detekt --init-config
-          ./gradlew detekt --stacktrace > ../../detekt-result.txt
-          if grep -q 'complexity' ../../detekt-result.txt; then
-            echo "Violations found!"
-            echo "::set-output name=violations::true"
-          else
-            echo "No violations found."
-            echo "::set-output name=violations::false"
-          fi
+        uses: detekt/detekt-action@v1.23.0
+        with:
+          # Caminho para o diretório do projeto
+          project-root: packages/clients/android
+          config-file: packages/clients/android/config/detekt/detekt.yml # Opcional: se houver arquivo de configuração personalizado
+          baseline-file: packages/clients/android/config/detekt/baseline.xml # Opcional: baseline para suprimir problemas conhecidos
+          fail-on-error: true # Definir como false se você quiser continuar a build mesmo com erros de código detectados
 
-      - name: Upload Detekt Results
+      - name: Upload Detekt Report
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: detekt-result
-          path: detekt-result.txt
+          name: detekt-report
+          path: detekt-report.html # Ou outro tipo de arquivo de relatório gerado
